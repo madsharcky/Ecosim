@@ -16,10 +16,10 @@ namespace EcoSim
         {
             ended = false;
             workerStation = new Station("workerStation");
-            workerStation.Farmers = 4;
+            workerStation.Farmers = 5;
             workerStation.Miners = 4;
             scienceStation = new Station("scienceStation");
-            scienceStation.Farmers = 4;
+            scienceStation.Farmers = 3;
             scienceStation.Scientists = 4;
             scienceStation.setLocation("x", 3);
             scienceStation.setLocation("y", 4);
@@ -35,10 +35,12 @@ namespace EcoSim
         {
         while (!ended)
             {
-                //Get distance between the two stations
                 Console.WriteLine(workerStation.getStats());
+                Console.WriteLine(scienceStation.getStats());
+                workerStation.nextRound();
+                scienceStation.nextRound();
 
-                
+
 
                 Console.WriteLine("want to end? (y/n)");
                 if (Console.ReadLine() == "y")
