@@ -1,7 +1,0 @@
-D:\Entwicklung\Schule\Ecosim\EcoSim\bin\Debug\EcoSim.exe.config
-D:\Entwicklung\Schule\Ecosim\EcoSim\bin\Debug\EcoSim.exe
-D:\Entwicklung\Schule\Ecosim\EcoSim\bin\Debug\EcoSim.pdb
-D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.csprojAssemblyReference.cache
-D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.csproj.CoreCompileInputs.cache
-D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.exe
-D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.pdb
