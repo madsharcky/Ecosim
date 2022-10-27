@@ -20,6 +20,8 @@ namespace EcoSim
         private List<Ship> ships;
         private Dictionary<String, int> location;
         private Random random = new Random();
+        private Dictionary<String, int> buying; //describes the need
+        private Dictionary<String, int> selling; //describes the surplus
 
         public int Farmers { get => farmers; set => farmers = value; }
         public int Scientists { get => scientists; set => scientists = value; }
@@ -39,6 +41,9 @@ namespace EcoSim
             money = 0;
             ships = new List<Ship>();
             location = new Dictionary<string, int>() { {"x",0},{ "y", 0 },{ "z", 0 } };
+            buying = new Dictionary<string, int>() { { "steel", 0 }, { "food", 0 },{"science",0 } };
+            selling = new Dictionary<string, int>() { { "steel", 0 }, { "food", 0 }, { "science", 0 } };
+            updateEconomy();
         }
         public String getStats()
         {
@@ -153,6 +158,10 @@ namespace EcoSim
                 }
             }
             return farmerDeath + " farmers, " + scientistDeath + " scientists and " + minerDeath + " miners have died";
+        }
+        private void updateEconomy() //#TODO implement needs for selling and buying
+        {
+            
         }
 
     }

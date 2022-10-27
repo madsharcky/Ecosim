@@ -25,18 +25,21 @@ namespace EcoSim
 
         public int DistanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
         internal Station TargetStation { get => targetStation; set => targetStation = value; }
-
-        public bool moveForward()
+        
+        
+        public bool moveForward() // returns true if ship has arrived and false if not
         {
-            distanceToTarget -= speed;
-            if (distanceToTarget < 0) {
+            if (distanceToTarget < speed)
+            {
                 distanceToTarget = 0;
                 return true;
             }
             else
             {
+            distanceToTarget -= speed;
                 return false;
             }
+            
         }
         public bool isHome()
         {
