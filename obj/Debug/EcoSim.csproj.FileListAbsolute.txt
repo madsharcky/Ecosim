@@ -5,3 +5,11 @@ D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.csprojAssemblyReference.cac
 D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.csproj.CoreCompileInputs.cache
 D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.exe
 D:\Entwicklung\Schule\Ecosim\EcoSim\obj\Debug\EcoSim.pdb
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\obj\Debug\EcoSim.csproj.AssemblyReference.cache
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\obj\Debug\EcoSim.csproj.SuggestedBindingRedirects.cache
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\obj\Debug\EcoSim.csproj.CoreCompileInputs.cache
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\obj\Debug\EcoSim.exe
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\obj\Debug\EcoSim.pdb
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\bin\Debug\EcoSim.exe.config
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\bin\Debug\EcoSim.exe
+D:\-_-MadCat-_-\selfmadeC#\Ecosim\bin\Debug\EcoSim.pdb

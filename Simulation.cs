@@ -18,9 +18,11 @@ namespace EcoSim
             workerStation = new Station("workerStation");
             workerStation.Farmers = 5;
             workerStation.Miners = 4;
+            workerStation.updateTradeList();
             scienceStation = new Station("scienceStation");
             scienceStation.Farmers = 3;
             scienceStation.Scientists = 4;
+            scienceStation.updateTradeList();
             scienceStation.setLocation("x", 3);
             scienceStation.setLocation("y", 4);
             distance = getDistanceBetween2Points(workerStation.getLocation("x"), workerStation.getLocation("y"), workerStation.getLocation("z"), scienceStation.getLocation("x"), scienceStation.getLocation("y"), scienceStation.getLocation("z"));
@@ -36,16 +38,17 @@ namespace EcoSim
         while (!ended)
             {
                 Console.WriteLine(workerStation.getStats());
-                Console.WriteLine(scienceStation.getStats());
-                workerStation.nextRound();
-                scienceStation.nextRound();
-
-
+                Console.WriteLine(scienceStation.getStats());                
 
                 Console.WriteLine("want to end? (y/n)");
                 if (Console.ReadLine() == "y")
                 {
                     ended = true;
+                }
+                else
+                {
+                    workerStation.nextRound();
+                    scienceStation.nextRound();
                 }
             }
         }
