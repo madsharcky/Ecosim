@@ -52,6 +52,10 @@ namespace EcoSim
                 return false;
             }
         }
+        public void setTarget(Station targetStation)
+        {
+            this.targetStation = targetStation;            
+        }
     }
 
 }

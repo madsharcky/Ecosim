@@ -16,12 +16,12 @@ namespace EcoSim
         {
             ended = false;
             workerStation = new Station("workerStation");
-            workerStation.Farmers = 5;
-            workerStation.Miners = 4;
+            workerStation.setPeople("farmers", 5);
+            workerStation.setPeople("miners", 4);
             workerStation.updateTradeList();
             scienceStation = new Station("scienceStation");
-            scienceStation.Farmers = 3;
-            scienceStation.Scientists = 4;
+            scienceStation.setPeople("farmers", 3);
+            scienceStation.setPeople("scientists", 4);
             scienceStation.updateTradeList();
             scienceStation.setLocation("x", 3);
             scienceStation.setLocation("y", 4);

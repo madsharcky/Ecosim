@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Resources;
 using System.Runtime.Versioning;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,14 +12,8 @@ namespace EcoSim
     class Station
     {
         private String name;
-        private float farmers;
-        private float scientists;
-        private float miners;
-        private float steel;
-        private float food;
-        private float science;
         private float threshhold;
-        private float money;
+        private Dictionary<String, float> people;
         private Dictionary<String, float> resources;
         private List<Ship> ships;
         private Dictionary<String, int> location;
@@ -26,30 +21,23 @@ namespace EcoSim
         private Dictionary<String, float> buying; //describes the need
         private Dictionary<String, float> selling; //describes the surplus
 
-        public float Farmers { get => farmers; set => farmers = value; }
-        public float Scientists { get => scientists; set => scientists = value; }
-        public float Miners { get => miners; set => miners = value; }
         public string Name { get => name; set => name = value; }
         public void setResource(String resource, float value) { resources[resource] = value; }
         public float getResource(String resource) { return resources[resource]; }
+        public void setPeople(String person, float value) { people[person] = value; }
+        public float getPeople(String person) { return people[person]; }
 
 
         public Station(String name)
         {
             this.name = name;
             threshhold = 100;
-            farmers = 0;
-            scientists = 0;
-            miners = 0;
-            steel = 0;
-            food = 0;
-            science = 1000;
-            money = 0;
-            resources = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 1000 } };
-            ships = new List<Ship>();
+            people = new Dictionary<string, float>() { { "farmers", 0 }, { "scientists", 0 }, { "miners", 0 } };
+            resources = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 1000 }, { "money", 0 } };
             location = new Dictionary<string, int>() { {"x",0},{ "y", 0 },{ "z", 0 } };
             buying = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 },{"science",0 } };
             selling = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 0 } };
+            ships = new List<Ship>();
             nextRound();
         }
         public String getStats()
@@ -64,8 +52,8 @@ namespace EcoSim
             {
                 sellingString += selling.ElementAt(i).Key + ": " + selling.ElementAt(i).Value + " ";
             }
-            String returnString = name + " farmers:" + farmers + " scientists:" + scientists + " miners:" + miners + " money:" + money + " science:" + science 
-                + " food:" + food + " Docked Ships:" + ships.Count + " steel:"+ steel
+            String returnString = name + " farmers:" + people["farmers"] + " scientists:" + people["scientists"] + " miners:" + people["miners"] + " money:" + resources["money"] + " science:" + resources["science"] 
+                + " food:" + resources["food"] + " Docked Ships:" + ships.Count + " steel:"+ resources["steel"]
                 + "\nbuying: " + buyingString + " selling: " + sellingString+"\n";
             return returnString;
         }
@@ -92,31 +80,31 @@ namespace EcoSim
             updateEconomy();
             updateTradeList();
             
-            if (steel > threshhold)
+            if (resources["food"] > threshhold)
             {
                 buildShip();
             }
-            if (food < 0)
+            if (resources["food"] < 0)
             {
-                int nrOfStarvingPeople = (int)Math.Abs(food);
-                food = 0;
+                int nrOfStarvingPeople = (int)Math.Abs(resources["food"]);
+                resources["food"] = 0;
 
                 Console.WriteLine("People are starving on "+ name + "!! "  +killRandomPeople(nrOfStarvingPeople) + ".");
             }
-            if (food > getPopulation()*2)
+            if (resources["food"] > getPopulation()*2)
             {
                 Console.WriteLine("A new " + createRandomPerson() + " has been born on "+ name +"!");
-                food -= 10;
+                resources["food"] -= 10;
                 
             }
         }
     
         private void buildShip()
         {
-            if (steel > threshhold)
+            if (resources["steel"] > threshhold)
             {
                 ships.Add(new Ship(this));
-                steel -= threshhold;
+                resources["steel"] -= threshhold;
             }
 
         }
@@ -125,13 +113,13 @@ namespace EcoSim
             switch (random.Next(1, 4))
             {
                 case 1:
-                    farmers++;
+                    people["farmers"]++;
                     return "farmer";
                 case 2:
-                    scientists++;
+                    people["scientists"]++;
                     return "scientist";
                 case 3:
-                    miners++;
+                    people["miners"]++;
                     return "miner";
                 default:
                     return "bug";
@@ -148,23 +136,23 @@ namespace EcoSim
                 switch (random.Next(1, 4))
                 {
                     case 1:
-                        if (farmers > 0)
+                        if (people["farmers"] > 0)
                         {
-                            farmers--;
+                            people["farmers"]--;
                             farmerDeath++;
                         }
                         break;
                     case 2:
-                        if (scientists > 0)
+                        if (people["scientists"] > 0)
                         {
-                            scientists--;
+                            people["scientists"]--;
                             scientistDeath++;
                         }
                         break;
                     case 3:
-                        if (miners > 0)
+                        if (people["miners"] > 0)
                         {
-                            miners--;
+                            people["miners"]--;
                             minerDeath++;
                         }
                         break;
@@ -181,28 +169,28 @@ namespace EcoSim
         /// </remarks>
         public void updateTradeList() 
         {
-            if (food < getPopulation() && foodgrowth() < 0){
+            if (resources["food"] < getPopulation() && foodgrowth() < 0){
                 buying["food"] = getPopulation()*10;
                 selling["food"] = 0;
             }
-            else if (food < getPopulation() && foodgrowth() > 0)
+            else if (resources["food"] < getPopulation() && foodgrowth() > 0)
             {
-                buying["food"] = getPopulation() - food;
+                buying["food"] = getPopulation() - resources["food"];
                 selling["food"] = 0;
             }
-            else if (food > getPopulation() && foodgrowth() < 0)
+            else if (resources["food"] > getPopulation() && foodgrowth() < 0)
             {
                 buying["food"] = 0;
                 selling["food"] = 0;
             }
-            else if (food > getPopulation() && foodgrowth() > 0)
+            else if (resources["food"] > getPopulation() && foodgrowth() > 0)
             {
                 buying["food"] = 0;
-                selling["food"] = food - getPopulation();
+                selling["food"] = resources["food"] - getPopulation();
             }
             if (ships.Count <1 && steelGrowth() < 1)
             {
-                buying["steel"] = 100-steel;
+                buying["steel"] = 100- resources["steel"];
                 selling["steel"] = 0;
             }
             else if (ships.Count < 1 && steelGrowth() > 0)
@@ -212,12 +200,12 @@ namespace EcoSim
             }
             else if (ships.Count > 0 && steelGrowth() < 1)
             {
-                buying["steel"] = 100-steel;
+                buying["steel"] = 100- resources["steel"];
                 selling["steel"] = 0;
             }
             else if (ships.Count > 0 && steelGrowth() > 0){ 
                 buying["steel"] = 0;
-                selling["steel"] = steel;
+                selling["steel"] = resources["steel"];
             }
             if (scienceGrowth() < 1)
             {
@@ -227,48 +215,54 @@ namespace EcoSim
             else if (scienceGrowth() > 0)
             {
                 buying["science"] = 0;
-                selling["science"] = science;
+                selling["science"] = resources["science"];
             }
             
             
         }
         private void updateEconomy()
         {
-            food += foodgrowth();
-            steel += steelGrowth();            
-            if (science > scientists)
+            resources["food"] += foodgrowth();
+            resources["steel"] += steelGrowth();         
+            if (resources["science"] > people["scientists"])
             {
-                money += moneyGrowth();
-                science += scienceGrowth();
+                resources["money"] += moneyGrowth();
+                resources["science"] += scienceGrowth();
             }
             else
             {
-                money += science;
-                science = 0;
+                resources["money"] += resources["science"];
+                resources["science"] = 0;
             }
         }
         private float foodgrowth(){
-            return (farmers * 2)-(farmers + scientists + miners);
+            return (people["farmers"] * 2)-(people["farmers"] + people["scientists"] + people["miners"]);
         }
         private float steelGrowth()
         {
-            return miners;
+            return people["miners"];
         }
         private float scienceGrowth()
         {
-            return scientists*(-1);
+            return people["scientists"] * (-1);
         }
         private float moneyGrowth()
         {
-            return scientists;
+            return people["scientists"];
         }
         private int getPopulation()
         {
-            return (int)farmers + (int)scientists + (int)miners;
+            return (int)people["farmers"] + (int)people["scientists"] + (int)people["miners"];
         }
-        private void calculateTradeAmount(String resource) //TODO implement 
-        {
-            
+        private bool sendShip(){
+            if (ships.Count > 0)
+            {
+                
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
