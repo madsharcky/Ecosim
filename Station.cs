@@ -153,23 +153,37 @@ namespace EcoSim
         /// <summary>
         /// creates a random person
         /// </summary>
-        private string createRandomPerson() // TODO: make a person based on needs
+        private string createRandomPerson()
         {
-            switch (random.Next(1, 4))
+            String mostNeeded = buying.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
+            switch (mostNeeded)
             {
-                case 1:
+                case "food":
                     people["farmers"]++;
                     return "farmer";
-                case 2:
-                    people["scientists"]++;
-                    return "scientist";
-                case 3:
+                case "steel":
                     people["miners"]++;
                     return "miner";
                 default:
-                    return "bug";
+                    switch (random.Next(1, 4))
+                    {
+                        case 1:
+                            people["farmers"]++;
+                            return "farmer";
+                        case 2:
+                            people["scientists"]++;
+                            return "scientist";
+                        case 3:
+                            people["miners"]++;
+                            return "miner";
+                        default:
+                            return "bug";
+                    }
             }
-        }
+            
+        }   
+
+        
         /// <summary>
         /// Kills a number of random peoplpe
         /// </summary>
@@ -186,12 +200,19 @@ namespace EcoSim
                 {
                     if (entry.Value > 0)
                     {
-                    avalablePeople.Append(entry.Key);
+                    avalablePeople.Add(entry.Key);
                     }
                 }
-
+                if (avalablePeople.Count > 0)
+                {
                 string randomKey = avalablePeople[random.Next(avalablePeople.Count)];
-                people[randomKey]--;
+                people[randomKey]--;                    
+                }
+                else
+                {
+                    return "no one has died!";
+                }
+                    
             }
             return amount + " people have died!";
         }
@@ -200,7 +221,7 @@ namespace EcoSim
         /// </summary>
         /// <returns>
         /// </returns>
-        public void updateTradeList() 
+        public void updateTradeList() //TODO: take into account growth
         {
             if (resources["food"] < getPopulation() && foodgrowth() < 0){
                 buying["food"] = getPopulation()*10;
@@ -259,7 +280,7 @@ namespace EcoSim
         private void updateEconomy()
         {
             resources["food"] += foodgrowth();
-            resources["steel"] += steelGrowth();         
+            resources["steel"] += steelGrowth();
             if (resources["science"] > people["scientists"])
             {
                 resources["money"] += moneyGrowth();
@@ -298,7 +319,7 @@ namespace EcoSim
         /// </returns>
         private float scienceGrowth()
         {
-            return people["scientists"] * (-1);
+            return (people["scientists"] * (-1))+1;
         }
         /// <summary>
         /// calculates the amount of moneygrowth
