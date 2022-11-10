@@ -1,11 +1,15 @@
-﻿using System;
+﻿using EcoSim.utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EcoSim
 {
+[Serializable]
     class Simulation
     {
         private bool ended;
@@ -29,6 +33,18 @@ namespace EcoSim
                 if (Console.ReadLine() == "y")
                 {
                     ended = true;
+                }
+                else if (Console.ReadLine() == "save")
+                {
+                    //TODO: Test Saving of class
+                    IFormatter formatter = new BinaryFormatter();
+                    GeneralFunctions.SerializeItem("SaveFile", formatter, this);
+                }
+                else if (Console.ReadLine() == "load")
+                {
+                    // TODO: Test Loading of class
+                    IFormatter formatter = new BinaryFormatter();
+                    GeneralFunctions.DeserializeItem("SaveFile", formatter,this);
                 }
                 else
                 {
