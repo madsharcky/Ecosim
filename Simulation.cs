@@ -15,7 +15,6 @@ namespace EcoSim
         private bool ended;
         private Station workerStation;
         private Station scienceStation;
-        private double distance;
         public Simulation()
         {
             ended = false;
