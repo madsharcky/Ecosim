@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace EcoSim
 {
+    [Serializable]
+    
     class Station
     {
         private float threshhold;
