@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EcoSim
 {
+    [Serializable]
     class Ship
     {
         private int speed;
