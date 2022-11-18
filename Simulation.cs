@@ -18,32 +18,20 @@ namespace EcoSim
 
         public void start()
         {
+                Console.WriteLine(workerStation.getStats());
+                Console.WriteLine(scienceStation.getStats());       
         while (!Ended)
             {
-                Console.WriteLine(workerStation.getStats());
-                Console.WriteLine(scienceStation.getStats());                
 
                 Console.WriteLine("want to end? (y/n)");
                 if (Console.ReadLine() == "y")
                 {
                     Ended = true;
                 }
-                //else if (Console.ReadLine() == "save")
-                //{
-                //    //TODO: Test Saving of class
-                //    IFormatter formatter = new BinaryFormatter();
-                //    GeneralFunctions.SerializeItem("SaveFile", formatter, this);
-                //}
-                //else if (Console.ReadLine() == "load")
-                //{
-                //    // TODO: Test Loading of class
-                //    IFormatter formatter = new BinaryFormatter();
-                //    GeneralFunctions.DeserializeItem("SaveFile", formatter,this);
-                //}
                 else
                 {
-                    workerStation.nextRound();
-                    scienceStation.nextRound();
+                    Console.WriteLine(workerStation.nextRound());
+                    Console.WriteLine(scienceStation.nextRound());
                 }
             }
         }

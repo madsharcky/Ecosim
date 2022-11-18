@@ -56,26 +56,26 @@ namespace EcoSim
         }
 
         /// <summary>
-        /// Returns the Statistics of the Station
+        /// returns a String with all the statistics of the Station
         /// </summary>
-        /// <returns>
-        /// A string containing all the statistics of the station
-        /// </returns>
-        public string getStats()
+        /// <param name="born"> a sentence telling who was born</param>
+        /// <param name="died"> a sentence saying who died and why</param>
+        /// <returns>a String with all the statistics of the station</returns>
+        public string getStats(String born = "", String died = "")
         {
             string buyingstring = "";
+            string sellingstring = "";
             for (int i = 0; i < buying.Count; i++)
             {
                 buyingstring += buying.ElementAt(i).Key + ": " + buying.ElementAt(i).Value + " ";
             }
-            string sellingstring = "";
             for (int i = 0; i < selling.Count; i++)
             {
                 sellingstring += selling.ElementAt(i).Key + ": " + selling.ElementAt(i).Value + " ";
             }
-            string returnstring = Name + " farmers:" + people["farmer"] + " scientists:" + people["scientist"] + " miners:" + people["miner"] + " money:" + resources["money"] + " science:" + resources["science"] 
-                + " food:" + resources["food"] + " Docked Ships:" + ships.Count + " steel:"+ resources["steel"]
-                + "\nbuying: " + buyingstring + " selling: " + sellingstring+"\n";
+            string returnstring = "At " + Name + born + died + " we have " + people["farmer"] + " farmers, " + people["scientist"] + " scientists, and " + people["miner"] + " miners. There is " 
+                + resources["money"] + " money avalable, " + resources["science"] +" science, " + resources["food"] + " food and " + resources["steel"]+" steel. The number of Docked Ships is " + ships.Count
+                + "\nThe buying list: " + buyingstring + "\nThe selling list: " + sellingstring+"\n";
             return returnstring;
         }
 
@@ -115,8 +115,11 @@ namespace EcoSim
         /// <summary>
         /// Advances the Station to the next round, calculationg all the Economic changes
         /// </summary>
-        public void nextRound()
+        /// <returns>a String with all the current stats of the station including changes in population</returns>
+        public String nextRound()
         {
+            String born = "";
+            String died = "";
             updateEconomy();
             updateTradeList();
             
@@ -129,14 +132,15 @@ namespace EcoSim
                 int nrOfStarvingPeople = (int)Math.Abs(resources["food"]);
                 resources["food"] = 0;
 
-                Console.WriteLine("People are starving on "+ Name + "!! "  +killRandomPeople(nrOfStarvingPeople) + ".");
+                died = " "+killRandomPeople(nrOfStarvingPeople) + " due to starvation, ";
             }
             if (resources["food"] > getPopulation()*2)
             {
-                Console.WriteLine("A new " + createRandomPerson() + " has been born on "+ Name +"!");
+                born = " a new " + createRandomPerson() + " has been born, ";
                 resources["food"] -= 10;
                 
             }
+            return getStats(born,died);
         }
 
         /// <summary>
@@ -155,6 +159,7 @@ namespace EcoSim
         /// <summary>
         /// creates a random person
         /// </summary>
+        /// <returns>returns a String containing the type of person ex: farmer</returns>
         private string createRandomPerson()
         {
             String mostNeeded = buying.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
