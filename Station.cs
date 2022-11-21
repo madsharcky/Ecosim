@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace EcoSim
 {
+    [Serializable]
+    
     class Station
     {
         private float threshhold;
@@ -44,7 +46,7 @@ namespace EcoSim
         {
             this.Name = name;
             threshhold = 100;
-            people = new Dictionary<string, float>() { { "farmers", farmerAmount }, { "scientists", scientistAmount }, { "miners", minerAmount } };
+            people = new Dictionary<string, float>() { { "farmer", farmerAmount }, { "scientist", scientistAmount }, { "miner", minerAmount } };
             resources = new Dictionary<string, float>() { { "steel", steelAmount }, { "food", foodAmount }, { "science", scienceAmount }, { "money", moneyAmount } };
             location = new Dictionary<string, int>() { {"x", xLocation },{ "y", yLocation },{ "z", zLocation } };
             buying = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 },{"science",0 } };
@@ -54,26 +56,26 @@ namespace EcoSim
         }
 
         /// <summary>
-        /// Returns the Statistics of the Station
+        /// returns a String with all the statistics of the Station
         /// </summary>
-        /// <returns>
-        /// A string containing all the statistics of the station
-        /// </returns>
-        public string getStats()
+        /// <param name="born"> a sentence telling who was born</param>
+        /// <param name="died"> a sentence saying who died and why</param>
+        /// <returns>a String with all the statistics of the station</returns>
+        public string getStats(String born = "", String died = "")
         {
             string buyingstring = "";
+            string sellingstring = "";
             for (int i = 0; i < buying.Count; i++)
             {
                 buyingstring += buying.ElementAt(i).Key + ": " + buying.ElementAt(i).Value + " ";
             }
-            string sellingstring = "";
             for (int i = 0; i < selling.Count; i++)
             {
                 sellingstring += selling.ElementAt(i).Key + ": " + selling.ElementAt(i).Value + " ";
             }
-            string returnstring = Name + " farmers:" + people["farmers"] + " scientists:" + people["scientists"] + " miners:" + people["miners"] + " money:" + resources["money"] + " science:" + resources["science"] 
-                + " food:" + resources["food"] + " Docked Ships:" + ships.Count + " steel:"+ resources["steel"]
-                + "\nbuying: " + buyingstring + " selling: " + sellingstring+"\n";
+            string returnstring = "At " + Name + born + died + " we have " + people["farmer"] + " farmers, " + people["scientist"] + " scientists, and " + people["miner"] + " miners. There is " 
+                + resources["money"] + " money avalable, " + resources["science"] +" science, " + resources["food"] + " food and " + resources["steel"]+" steel. The number of Docked Ships is " + ships.Count
+                + "\nThe buying list: " + buyingstring + "\nThe selling list: " + sellingstring+"\n";
             return returnstring;
         }
 
@@ -113,8 +115,11 @@ namespace EcoSim
         /// <summary>
         /// Advances the Station to the next round, calculationg all the Economic changes
         /// </summary>
-        public void nextRound()
+        /// <returns>a String with all the current stats of the station including changes in population</returns>
+        public String nextRound()
         {
+            String born = "";
+            String died = "";
             updateEconomy();
             updateTradeList();
             
@@ -127,14 +132,15 @@ namespace EcoSim
                 int nrOfStarvingPeople = (int)Math.Abs(resources["food"]);
                 resources["food"] = 0;
 
-                Console.WriteLine("People are starving on "+ Name + "!! "  +killRandomPeople(nrOfStarvingPeople) + ".");
+                died = " "+killRandomPeople(nrOfStarvingPeople) + " due to starvation, ";
             }
             if (resources["food"] > getPopulation()*2)
             {
-                Console.WriteLine("A new " + createRandomPerson() + " has been born on "+ Name +"!");
+                born = " a new " + createRandomPerson() + " has been born, ";
                 resources["food"] -= 10;
                 
             }
+            return getStats(born,died);
         }
 
         /// <summary>
@@ -153,37 +159,38 @@ namespace EcoSim
         /// <summary>
         /// creates a random person
         /// </summary>
+        /// <returns>returns a String containing the type of person ex: farmer</returns>
         private string createRandomPerson()
         {
             String mostNeeded = buying.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
             switch (mostNeeded)
             {
                 case "food":
-                    people["farmers"]++;
+                    people["farmer"]++;
                     return "farmer";
                 case "steel":
-                    people["miners"]++;
+                    people["miner"]++;
                     return "miner";
                 default:
                     switch (random.Next(1, 4))
                     {
                         case 1:
-                            people["farmers"]++;
+                            people["farmer"]++;
                             return "farmer";
                         case 2:
-                            people["scientists"]++;
+                            people["scientist"]++;
                             return "scientist";
                         case 3:
-                            people["miners"]++;
+                            people["miner"]++;
                             return "miner";
                         default:
                             return "bug";
                     }
             }
             
-        }   
+        }
 
-        
+
         /// <summary>
         /// Kills a number of random peoplpe
         /// </summary>
@@ -192,29 +199,48 @@ namespace EcoSim
         /// A string describing the Amount of people that have died
         /// </returns>
         private string killRandomPeople(int amount)
-        {            
-            for (int i = 0; i <= amount; i++)
+        {
+            Dictionary<string, int> killedPeople = new Dictionary<string, int>();
+            String returnString = "";
+            foreach (KeyValuePair<string, float> entry in people)
             {
-                List<string> avalablePeople = new List<string>();
-                foreach (KeyValuePair<string, float> entry in people)
+                if (entry.Value > 0)
                 {
-                    if (entry.Value > 0)
-                    {
-                    avalablePeople.Add(entry.Key);
-                    }
+                    killedPeople.Add(entry.Key, 0);
                 }
-                if (avalablePeople.Count > 0)
+            }
+
+            for (int i = 0; i < amount; i++)
+            {
+                int randomIndex = random.Next(killedPeople.Count);
+                string person = killedPeople.Keys.ElementAt(randomIndex);
+                if (killedPeople[person] == people[person])
                 {
-                string randomKey = avalablePeople[random.Next(avalablePeople.Count)];
-                people[randomKey]--;                    
+                    i--;
                 }
                 else
                 {
-                    return "no one has died!";
+                    killedPeople[person]++;
                 }
-                    
             }
-            return amount + " people have died!";
+
+            foreach (String person in killedPeople.Keys)
+            {
+                if (killedPeople[person] > 0)
+                {
+                    people[person] -= killedPeople[person];
+                    if (killedPeople[person] > 1)
+                    {
+                        returnString += " and " + killedPeople[person] + " " + person + "s have died";
+                    }
+                    else
+                    {
+                        returnString += " and a " + person + " has died";
+                    }
+                }
+            }
+                       
+            return returnString.Remove(0, 5);
         }
         /// <summary>
         /// Updtate the buying and selling values depending on the current state and growth of the economy
@@ -281,7 +307,7 @@ namespace EcoSim
         {
             resources["food"] += foodgrowth();
             resources["steel"] += steelGrowth();
-            if (resources["science"] > people["scientists"])
+            if (resources["science"] > people["scientist"])
             {
                 resources["money"] += moneyGrowth();
                 resources["science"] += scienceGrowth();
@@ -299,7 +325,7 @@ namespace EcoSim
         /// a float value containing the positive or negative growth of food
         /// </returns>
         private float foodgrowth(){
-            return (people["farmers"] * 2)-(people["farmers"] + people["scientists"] + people["miners"]);
+            return (people["farmer"] * 2)-(people["farmer"] + people["scientist"] + people["miner"]);
         }
         /// <summary>
         /// calculates the amount of steelgrowth
@@ -309,7 +335,7 @@ namespace EcoSim
         /// </returns>
         private float steelGrowth()
         {
-            return people["miners"];
+            return people["miner"];
         }
         /// <summary>
         /// calculates the amount of sciencegrowth
@@ -319,7 +345,7 @@ namespace EcoSim
         /// </returns>
         private float scienceGrowth()
         {
-            return (people["scientists"] * (-1))+1;
+            return (people["scientist"] * (-1))+1;
         }
         /// <summary>
         /// calculates the amount of moneygrowth
@@ -329,7 +355,7 @@ namespace EcoSim
         /// </returns>
         private float moneyGrowth()
         {
-            return people["scientists"];
+            return people["scientist"];
         }
         /// <summary>
         /// returns the total amount of people living on the station rounded to the nearest int value
@@ -339,7 +365,7 @@ namespace EcoSim
         /// </returns>
         private int getPopulation()
         {
-            return (int)people["farmers"] + (int)people["scientists"] + (int)people["miners"];
+            return (int)people["farmer"] + (int)people["scientist"] + (int)people["miner"];
         }
         /// <summary>
         /// send a docked ship from the station to a target location
