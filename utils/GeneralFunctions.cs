@@ -23,14 +23,20 @@ namespace EcoSim.utils
         }
 
         //https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.iserializable?redirectedfrom=MSDN&view=net-7.0
-            
 
+        /// <summary>
+        /// serializes an object to a file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="classObject"></param>
         public static void SerializeItem(string fileName, Simulation classObject)
         {
             // Create an instance of the type and serialize it.
-            //String dateTime = DateTime.Now.ToString("hh.mm.ss.dd.MM.yyyy");
-            String dateTime = "now";
-            String path = @"D:\Entwicklung\Schule\Ecosim\EcoSim\saveData\" + fileName + "_"+ dateTime + ".bin";
+            String dateTime = DateTime.Now.ToString("dd.MM.yyyy_HH.mm.ss");
+            String path = GetPath() + "/savefiles";
+            Directory.CreateDirectory(path);
+            path = GetPath() + "/savefiles/" +fileName + "_"+ dateTime + ".bin";
+           
             System.IO.Stream stream = File.OpenWrite(path);
 
             BinaryFormatter formatter = new BinaryFormatter();
@@ -42,11 +48,14 @@ namespace EcoSim.utils
             stream.Dispose();
         }
 
-        public static Simulation DeserializeItem(string fileName)
+        /// <summary>
+        /// load a file from a serialized class
+        /// </summary>
+        /// <param name="filePath">the file from which should be loaded</param>
+        /// <returns>a classobject</returns>
+        public static Simulation DeserializeItem(string filePath)
         {
-            //String dateTime = DateTime.Now.ToString("hh.mm.ss.dd.MM.yyyy");
-            String dateTime = "now";
-            String path = @"D:\Entwicklung\Schule\Ecosim\EcoSim\saveData\" + fileName + "_" + dateTime + ".bin";
+            String path = filePath;
             BinaryFormatter formatter = new BinaryFormatter();
             FileStream stream = File.Open(path, FileMode.Open);
             Simulation classObject = (Simulation)formatter.Deserialize(stream);
@@ -55,6 +64,15 @@ namespace EcoSim.utils
             stream.Close();
             stream.Dispose();
             return classObject;
+        }
+
+        /// <summary>
+        /// returns the path of the current directory
+        /// </summary>
+        /// <returns>the path of the current directory</returns>
+        public static string GetPath()
+        {
+            return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
         }
     }
 }
