@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Resources;
 using System.Runtime.Versioning;
@@ -19,8 +20,10 @@ namespace EcoSim
         private List<Ship> ships;
         private Dictionary<string, int> location;
         private Random random = new Random();
-        private Dictionary<string, float> buying; //describes the need
-        private Dictionary<string, float> selling; //describes the surplus
+        private Dictionary<string, float> need; //describes the need
+        private Dictionary<string, float> surplus; //describes the surplus
+        private Dictionary<string, float> buying; //describes the list of goods that want to be bought
+        private Dictionary<string, float> selling; //describes the list of goods that want to be sold
 
         public string Name { get; set; }
         public void setResource(string resource, float value) { resources[resource] = value; }
@@ -47,8 +50,10 @@ namespace EcoSim
             this.Name = name;
             threshhold = 100;
             people = new Dictionary<string, float>() { { "farmer", farmerAmount }, { "scientist", scientistAmount }, { "miner", minerAmount } };
-            resources = new Dictionary<string, float>() { { "steel", steelAmount }, { "food", foodAmount }, { "science", scienceAmount }, { "money", moneyAmount } };
+            resources = new Dictionary<string, float>() { { "steel", steelAmount }, { "food", foodAmount }, { "science", scienceAmount }, { "money", moneyAmount }, {"promisedMoney", 0 } };
             location = new Dictionary<string, int>() { {"x", xLocation },{ "y", yLocation },{ "z", zLocation } };
+            need = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 0 } };
+            surplus = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 0 } };
             buying = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 },{"science",0 } };
             selling = new Dictionary<string, float>() { { "steel", 0 }, { "food", 0 }, { "science", 0 } };
             ships = new List<Ship>();
@@ -162,7 +167,7 @@ namespace EcoSim
         /// <returns>returns a String containing the type of person ex: farmer</returns>
         private string createRandomPerson()
         {
-            String mostNeeded = buying.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
+            String mostNeeded = need.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
             switch (mostNeeded)
             {
                 case "food":
@@ -189,7 +194,6 @@ namespace EcoSim
             }
             
         }
-
 
         /// <summary>
         /// Kills a number of random peoplpe
@@ -243,62 +247,91 @@ namespace EcoSim
             return returnString.Remove(0, 5);
         }
         /// <summary>
-        /// Updtate the buying and selling values depending on the current state and growth of the economy
+        /// Updtate the needs and surpluses values depending on the current state and growth of the economy
         /// </summary>
         /// <returns>
         /// </returns>
-        public void updateTradeList() //TODO: take into account growth
+        public void updateNeeds()
         {
             if (resources["food"] < getPopulation() && foodgrowth() < 0){
-                buying["food"] = getPopulation()*10;
-                selling["food"] = 0;
+                need["food"] = getPopulation()*10;
+                surplus["food"] = 0;
             }
             else if (resources["food"] < getPopulation() && foodgrowth() > 0)
             {
-                buying["food"] = getPopulation() - resources["food"];
-                selling["food"] = 0;
+                need["food"] = getPopulation() - resources["food"];
+                surplus["food"] = 0;
             }
             else if (resources["food"] > getPopulation() && foodgrowth() < 0)
             {
-                buying["food"] = 0;
-                selling["food"] = 0;
+                need["food"] = 0;
+                surplus["food"] = 0;
             }
             else if (resources["food"] > getPopulation() && foodgrowth() > 0)
             {
-                buying["food"] = 0;
-                selling["food"] = resources["food"] - getPopulation();
+                need["food"] = 0;
+                surplus["food"] = resources["food"] - getPopulation();
             }
             if (ships.Count <1 && steelGrowth() < 1)
             {
-                buying["steel"] = 100- resources["steel"];
-                selling["steel"] = 0;
+                need["steel"] = 100- resources["steel"];
+                surplus["steel"] = 0;
             }
             else if (ships.Count < 1 && steelGrowth() > 0)
             {
-                buying["steel"] = 0;
-                selling["steel"] = 0;
+                need["steel"] = 0;
+                surplus["steel"] = 0;
             }
             else if (ships.Count > 0 && steelGrowth() < 1)
             {
-                buying["steel"] = 100- resources["steel"];
-                selling["steel"] = 0;
+                need["steel"] = 100- resources["steel"];
+                surplus["steel"] = 0;
             }
-            else if (ships.Count > 0 && steelGrowth() > 0){ 
-                buying["steel"] = 0;
-                selling["steel"] = resources["steel"];
+            else if (ships.Count > 0 && steelGrowth() > 0)
+            {
+                need["steel"] = 0;
+                surplus["steel"] = resources["steel"];
             }
             if (scienceGrowth() < 1)
             {
-                buying["science"] = Math.Abs(scienceGrowth());
-                selling["science"] = 0;
+                need["science"] = Math.Abs(scienceGrowth());
+                surplus["science"] = 0;
             }
             else if (scienceGrowth() > 0)
             {
-                buying["science"] = 0;
-                selling["science"] = resources["science"];
+                need["science"] = 0;
+                surplus["science"] = resources["science"];
+            }            
+        }
+        
+        private void updateTradeList()
+        {
+            foreach (var key in selling.Keys) //reset the selling list
+            {
+                selling[key] = 0;
+            }
+            foreach (var key in buying.Keys) //reset the buying list
+            {
+                buying[key] = 0;
             }
             
+            selling = surplus;
             
+            String mostNeeded = need.Aggregate((v1, v2) => v1.Value > v2.Value ? v1 : v2).Key;
+            if (resources["money"] - need[mostNeeded] <= 0) //spend all money on most needed item
+            {
+                buying[mostNeeded] = need[mostNeeded] - resources["money"];
+                resources["promisedMoney"] = resources["money"];                
+            }
+            else
+            {
+                buying[mostNeeded] = need[mostNeeded];
+                resources["promisedMoney"] += buying[mostNeeded];
+                // select random item from need Dictionary that is not the most needed item
+                string randomKey = //TODO: finish this
+
+            }
+
         }
         /// <summary>
         /// Updates the amount of resources on the station
